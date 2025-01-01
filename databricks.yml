@@ -1,0 +1,21 @@
+bundle:
+  name: new-york-taxi-demo
+
+resources:
+  jobs:
+    training-job:
+      name: taxi-training-workflow
+      tasks:
+        - task_key: preprocess
+          spark_python_task:
+            python_file: "src/data_preprocessing.py"
+        - task_key: feature_engineering
+          depends_on:
+            - task_key: preprocess
+          spark_python_task:
+            python_file: "src/feature_engineering.py"
+        - task_key: train_model
+          depends_on:
+            - task_key: feature_engineering
+          spark_python_task:
+            python_file: "src/model_training.py"
