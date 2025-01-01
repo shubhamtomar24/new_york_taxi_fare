@@ -1,0 +1,5 @@
+{ 
+   "name": "New York Taxi Demo DevContainer", 
+   "dockerFile": "./Dockerfile", 
+   "settings": { "python.pythonPath": "/usr/bin/python3" } 
+} 
