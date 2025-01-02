@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Install uv for dependency management
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      # Step 3: Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        id: setup-python
+        with:
+          python-version-file: "pyproject.toml"  # Uses the Python version specified in pyproject.toml
+
+      # Step 4: Create and activate a virtual environment
+      - name: Create virtual environment
+        run: |
+          uv venv -p ${{ steps.setup-python.outputs.python-version }} .venv
+
+      # Step 5: Install project dependencies
+      - name: Activate virtual environment and install dependencies
+        run: |
+          source .venv/bin/activate
+          uv sync --all-extras
+
+      # Step 6: Run pre-commit checks
+      - name: Run pre-commit checks
+        run: |
+          source .venv/bin/activate
+          pre-commit install
+          pre-commit run --all-files
+
+      # Step 7: Run Unit Tests
+      - name: Run Unit Tests
+        run: |
+          source .venv/bin/activate
+          pytest tests/

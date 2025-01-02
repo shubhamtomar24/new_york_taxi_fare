@@ -1,0 +1,44 @@
+name: CD
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Allow manual trigger of this workflow
+
+jobs:
+  deploy_to_databricks:
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # Step 3: Install Databricks CLI
+      - name: Install Databricks CLI
+        run: |
+          pip install databricks-cli
+
+      # Step 4: Authenticate Databricks CLI
+      - name: Configure Databricks CLI
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+        run: |
+          databricks configure --token <<< $DATABRICKS_TOKEN
+
+      # Step 5: Deploy Databricks Jobs
+      - name: Deploy Databricks Bundle
+        run: |
+          databricks bundles deploy --target dev
+
+      # Step 6: Trigger Databricks Job
+      - name: Trigger Databricks Job
+        run: |
+          databricks bundles run --target dev --job training-job
