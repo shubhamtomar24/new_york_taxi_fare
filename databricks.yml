@@ -1,6 +1,26 @@
 bundle:
   name: new-york-taxi-demo
 
+# These are the default artifact settings if not otherwise overridden in
+# the following "targets" top-level mapping.
+artifacts:
+  default:
+    type: whl
+    build: uv build
+    path: .
+
+# These are for any custom variables for use throughout the bundle.
+variables:
+  root_path:
+    description: root_path for the bundle files
+    default: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}/files
+  git_sha:
+    description: git_sha
+    default: 1aa0037267af83a7685bea002a332739563fa3c9
+  schedule_pause_status:
+    description: schedule pause status
+    default: UNPAUSED
+
 resources:
   jobs:
     training-job:
@@ -19,3 +39,20 @@ resources:
             - task_key: feature_engineering
           spark_python_task:
             python_file: "src/model_training.py"
+
+# Two targets
+targets:
+
+  dev: # AWS West Region workspace
+    mode: development
+    default: true
+    cluster_id: 1109-205408-dob4qyuc
+    workspace:
+      host: https://dbc-69e6c936-6660.cloud.databricks.com/
+
+  prod:
+    mode: production # Comment out this line when deploying to production, so that "run_as" above is not required
+    default: false
+    cluster_id: 1109-205408-dob4qyuc
+    workspace:
+      host: https://dbc-69e6c936-6660.cloud.databricks.com/
